@@ -196,3 +196,6 @@ config/local.js
 # Local database dumps
 *.dump
 *.sql
+
+# API Testing Documentation (contains sensitive examples)
+api_test_commands.md
