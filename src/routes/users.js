@@ -622,4 +622,77 @@ router.delete('/certifications/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/users/saved-jobs - Get user's saved jobs (Protected)
+router.get('/saved-jobs', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { page = 1, limit = 20 } = req.query;
+
+    // Pagination
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Get user with saved jobs populated
+    const user = await User.findById(userId)
+      .populate({
+        path: 'savedJobs.jobId',
+        model: 'Job',
+        select: 'title company location salary domain description eligibility educationLevel course specialization skills applyLink createdAt'
+      })
+      .select('savedJobs');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found'
+        }
+      });
+    }
+
+    // Filter out any saved jobs where the job was deleted
+    const validSavedJobs = user.savedJobs.filter(savedJob => savedJob.jobId !== null);
+
+    // Apply pagination
+    const totalSavedJobs = validSavedJobs.length;
+    const totalPages = Math.ceil(totalSavedJobs / limitNum);
+    const paginatedSavedJobs = validSavedJobs
+      .sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt)) // Sort by most recently saved
+      .slice(skip, skip + limitNum);
+
+    // Format response
+    const savedJobsWithDetails = paginatedSavedJobs.map(savedJob => ({
+      savedAt: savedJob.savedAt,
+      job: savedJob.jobId
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        savedJobs: savedJobsWithDetails,
+        pagination: {
+          current_page: pageNum,
+          total_pages: totalPages,
+          total_saved_jobs: totalSavedJobs,
+          has_next: pageNum < totalPages,
+          has_prev: pageNum > 1,
+          per_page: limitNum
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Get saved jobs error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'SERVER_ERROR',
+        message: 'Failed to fetch saved jobs'
+      }
+    });
+  }
+});
+
 module.exports = router;

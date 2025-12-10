@@ -170,6 +170,11 @@ The server will start on `http://localhost:5000`
 - `PUT /api/users/certifications/:id` - Update certification (requires authentication)
 - `DELETE /api/users/certifications/:id` - Delete certification (requires authentication)
 
+### Saved Jobs
+- `POST /api/jobs/:id/save` - Save a job for later (requires authentication)
+- `DELETE /api/jobs/:id/save` - Remove job from saved jobs (requires authentication)
+- `GET /api/users/saved-jobs` - Get user's saved jobs with pagination (requires authentication)
+
 ### Education Data
 - `GET /api/education/levels` - Get education levels (Graduate, Post Graduate)
 - `GET /api/education/courses?level=Graduate` - Get courses by education level
@@ -242,6 +247,8 @@ The `api_test_commands.md` file includes:
 - ✅ Advanced filtering by education level, course, specialization, domain, location
 - ✅ Search functionality across job titles, companies, descriptions
 - ✅ Pagination support for large datasets
+- ✅ **Save Jobs Functionality**: Users can save/unsave jobs for later viewing
+- ✅ **Saved Jobs Management**: Get saved jobs with pagination and full job details
 
 ### Authentication & User Management
 - ✅ **Dual Login System**: Email/Password + Google OAuth with login type separation
@@ -409,6 +416,61 @@ Response:
     "B.Com",
     "Others (BA, B.Pharm, etc.)"
   ]
+}
+```
+
+### Save Job
+```bash
+POST /api/jobs/JOB_ID/save
+Authorization: Bearer JWT_TOKEN
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "jobId": "60f7b3b3b3b3b3b3b3b3b3b3",
+    "savedAt": "2024-12-10T18:30:00.000Z",
+    "totalSavedJobs": 5
+  },
+  "message": "Job saved successfully"
+}
+```
+
+### Get Saved Jobs
+```bash
+GET /api/users/saved-jobs?page=1&limit=10
+Authorization: Bearer JWT_TOKEN
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "savedJobs": [
+      {
+        "savedAt": "2024-12-10T18:30:00.000Z",
+        "job": {
+          "_id": "60f7b3b3b3b3b3b3b3b3b3b3",
+          "title": "Software Engineer",
+          "company": "Tech Solutions",
+          "location": "Bangalore",
+          "salary": "₹6-9 LPA",
+          "domain": "Software Development"
+        }
+      }
+    ],
+    "pagination": {
+      "current_page": 1,
+      "total_pages": 1,
+      "total_saved_jobs": 5,
+      "has_next": false,
+      "has_prev": false,
+      "per_page": 10
+    }
+  }
 }
 ```
 

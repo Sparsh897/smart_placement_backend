@@ -1,5 +1,7 @@
 const express = require('express');
 const Job = require('../models/Job');
+const User = require('../models/User');
+const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -206,6 +208,139 @@ router.get('/meta/companies', async (req, res) => {
       error: {
         code: 'SERVER_ERROR',
         message: 'Failed to fetch companies'
+      }
+    });
+  }
+});
+
+// POST /api/jobs/:id/save - Save a job (Protected)
+router.post('/:id/save', authenticateToken, async (req, res) => {
+  try {
+    const jobId = req.params.id;
+    const userId = req.user._id;
+
+    // Check if job exists
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'JOB_NOT_FOUND',
+          message: 'Job not found'
+        }
+      });
+    }
+
+    // Get user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found'
+        }
+      });
+    }
+
+    // Check if job is already saved
+    const isAlreadySaved = user.savedJobs.some(
+      savedJob => savedJob.jobId.toString() === jobId
+    );
+
+    if (isAlreadySaved) {
+      return res.status(409).json({
+        success: false,
+        error: {
+          code: 'JOB_ALREADY_SAVED',
+          message: 'Job is already saved'
+        }
+      });
+    }
+
+    // Add job to saved jobs
+    user.savedJobs.push({
+      jobId: jobId,
+      savedAt: new Date()
+    });
+
+    await user.save();
+
+    res.status(201).json({
+      success: true,
+      data: {
+        jobId: jobId,
+        savedAt: new Date(),
+        totalSavedJobs: user.savedJobs.length
+      },
+      message: 'Job saved successfully'
+    });
+
+  } catch (err) {
+    console.error('Save job error:', err);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'SERVER_ERROR',
+        message: 'Failed to save job'
+      }
+    });
+  }
+});
+
+// DELETE /api/jobs/:id/save - Unsave a job (Protected)
+router.delete('/:id/save', authenticateToken, async (req, res) => {
+  try {
+    const jobId = req.params.id;
+    const userId = req.user._id;
+
+    // Get user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found'
+        }
+      });
+    }
+
+    // Check if job is saved
+    const savedJobIndex = user.savedJobs.findIndex(
+      savedJob => savedJob.jobId.toString() === jobId
+    );
+
+    if (savedJobIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'JOB_NOT_SAVED',
+          message: 'Job is not in your saved jobs'
+        }
+      });
+    }
+
+    // Remove job from saved jobs
+    user.savedJobs.splice(savedJobIndex, 1);
+    await user.save();
+
+    res.json({
+      success: true,
+      data: {
+        jobId: jobId,
+        totalSavedJobs: user.savedJobs.length
+      },
+      message: 'Job removed from saved jobs'
+    });
+
+  } catch (err) {
+    console.error('Unsave job error:', err);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'SERVER_ERROR',
+        message: 'Failed to unsave job'
       }
     });
   }

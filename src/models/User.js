@@ -110,6 +110,17 @@ const UserSchema = new mongoose.Schema(
       credentialId: String,
       url: String
     }],
+    savedJobs: [{
+      jobId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Job',
+        required: true
+      },
+      savedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }],
     resume: {
       fileUrl: String,
       fileName: String,
