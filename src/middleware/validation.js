@@ -87,6 +87,11 @@ const validateProfileUpdate = [
     .isNumeric()
     .withMessage('Current salary must be a number'),
   
+  body('profile.resumeUrl')
+    .optional()
+    .isURL()
+    .withMessage('Resume URL must be a valid URL'),
+  
   handleValidationErrors
 ];
 

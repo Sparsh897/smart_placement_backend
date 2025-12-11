@@ -59,6 +59,7 @@ const UserSchema = new mongoose.Schema(
       specialization: String,
       summary: String,
       currentSalary: Number,
+      resumeUrl: String,
       visibility: { type: Boolean, default: true }
     },
     preferences: {
