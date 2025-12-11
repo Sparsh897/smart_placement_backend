@@ -62,8 +62,16 @@ router.put('/profile', authenticateToken, validateProfileUpdate, async (req, res
     allowedUpdates.forEach(field => {
       if (updates[field] !== undefined) {
         if (field === 'location' || field === 'profile' || field === 'preferences') {
-          // Merge nested objects
-          user[field] = { ...user[field], ...updates[field] };
+          // Handle nested objects properly
+          if (user[field]) {
+            // Merge with existing nested object
+            Object.keys(updates[field]).forEach(nestedKey => {
+              user[field][nestedKey] = updates[field][nestedKey];
+            });
+          } else {
+            // Create new nested object
+            user[field] = updates[field];
+          }
         } else {
           user[field] = updates[field];
         }
