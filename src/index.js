@@ -9,6 +9,7 @@ const jobRoutes = require('./routes/jobs');
 const educationRoutes = require('./routes/education');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const jobApplicationRoutes = require('./routes/jobApplications');
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ app.use('/api/jobs', jobRoutes);
 app.use('/api/education', educationRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/job-applications', jobApplicationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

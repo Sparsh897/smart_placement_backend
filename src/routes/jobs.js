@@ -1,12 +1,13 @@
 const express = require('express');
 const Job = require('../models/Job');
 const User = require('../models/User');
+const JobApplication = require('../models/JobApplication');
 const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
 // GET /api/jobs
-// Optional query params: educationLevel, course, specialization, domain, location, salary_min, salary_max, page, limit, search
+// Optional query params: educationLevel, course, specialization, domain, location, salary_min, salary_max, page, limit, search, excludeApplied
 router.get('/', async (req, res) => {
   try {
     const { 
@@ -19,7 +20,8 @@ router.get('/', async (req, res) => {
       salary_max, 
       page = 1, 
       limit = 20, 
-      search 
+      search,
+      excludeApplied = 'false'
     } = req.query;
 
     // Build filter object
@@ -38,6 +40,30 @@ router.get('/', async (req, res) => {
         { description: { $regex: search, $options: 'i' } },
         { domain: { $regex: search, $options: 'i' } }
       ];
+    }
+
+    // Exclude applied jobs if user is authenticated and requests it
+    let appliedJobIds = [];
+    if (excludeApplied === 'true') {
+      // Try to get user from token (optional authentication)
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const jwt = require('jsonwebtoken');
+          const token = authHeader.substring(7);
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          const userId = decoded.userId;
+          
+          // Get user's applied job IDs
+          appliedJobIds = await JobApplication.getUserAppliedJobIds(userId);
+          if (appliedJobIds.length > 0) {
+            filter._id = { $nin: appliedJobIds };
+          }
+        } catch (tokenError) {
+          // Invalid token, continue without filtering
+          console.log('Invalid token for job filtering:', tokenError.message);
+        }
+      }
     }
 
     // Pagination
