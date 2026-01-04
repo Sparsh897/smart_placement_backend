@@ -10,11 +10,17 @@ const educationRoutes = require('./routes/education');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const jobApplicationRoutes = require('./routes/jobApplications');
+const companyRoutes = require('./routes/companies');
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Log Node.js version on startup
+console.log(`🚀 Node.js Version: ${process.version}`);
+console.log(`📦 NPM Version: ${process.env.npm_version || 'Unknown'}`);
+console.log(`💻 Platform: ${process.platform} ${process.arch}`);
 
 // Middleware
 app.use(cors({
@@ -44,11 +50,29 @@ app.get('/', (req, res) => {
   res.json({ message: 'Smart Placement API is running' });
 });
 
+// System info endpoint
+app.get('/api/system/info', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      nodeVersion: process.version,
+      platform: process.platform,
+      architecture: process.arch,
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString()
+    },
+    message: 'System information retrieved successfully'
+  });
+});
+
 app.use('/api/jobs', jobRoutes);
 app.use('/api/education', educationRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/job-applications', jobApplicationRoutes);
+app.use('/api/companies', companyRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

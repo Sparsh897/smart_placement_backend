@@ -441,6 +441,24 @@ The server will start on `http://localhost:5000`
 - `DELETE /api/jobs/:id/save` - Remove job from saved jobs (requires authentication)
 - `GET /api/users/saved-jobs` - Get user's saved jobs with pagination (requires authentication)
 
+### Company Management
+- `POST /api/companies/register` - Register company account
+- `POST /api/companies/login` - Company login
+- `GET /api/companies/me` - Get company profile (requires company authentication)
+- `PUT /api/companies/profile` - Update company profile (requires company authentication)
+- `POST /api/companies/jobs` - Create job posting (requires company authentication)
+- `GET /api/companies/jobs` - Get company's job postings (requires company authentication)
+- `GET /api/companies/jobs/:id` - Get specific job (requires company authentication)
+- `PUT /api/companies/jobs/:id` - Update job posting (requires company authentication)
+- `DELETE /api/companies/jobs/:id` - Delete job posting (requires company authentication)
+- `PATCH /api/companies/jobs/:id/toggle-status` - Toggle job active/inactive status (requires company authentication)
+- `GET /api/companies/dashboard` - Get company dashboard statistics (requires company authentication)
+- `GET /api/companies/applications` - Get all applications for company jobs (requires company authentication)
+- `GET /api/companies/applications/:id` - Get specific application details (requires company authentication)
+- `PATCH /api/companies/applications/:id/status` - Update application status (requires company authentication)
+- `GET /api/companies/jobs/:jobId/applications` - Get applications for specific job (requires company authentication)
+- `POST /api/companies/applications/bulk-action` - Perform bulk actions on applications (requires company authentication)
+
 ### Education Data
 - `GET /api/education/levels` - Get education levels (Graduate, Post Graduate)
 - `GET /api/education/courses?level=Graduate` - Get courses by education level

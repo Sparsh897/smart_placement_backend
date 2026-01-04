@@ -22,7 +22,26 @@ const generateTokensForUser = (user) => {
   const payload = {
     userId: user._id,
     email: user.email,
-    loginType: user.loginType
+    loginType: user.loginType,
+    type: 'user'
+  };
+  
+  const accessToken = generateToken(payload);
+  
+  return {
+    accessToken,
+    tokenType: 'Bearer',
+    expiresIn: JWT_EXPIRES_IN
+  };
+};
+
+// Generate tokens for company
+const generateTokensForCompany = (company) => {
+  const payload = {
+    companyId: company._id,
+    email: company.email,
+    name: company.name,
+    type: 'company'
   };
   
   const accessToken = generateToken(payload);
@@ -38,5 +57,6 @@ module.exports = {
   generateToken,
   verifyToken,
   generateTokensForUser,
+  generateTokensForCompany,
   JWT_SECRET
 };
